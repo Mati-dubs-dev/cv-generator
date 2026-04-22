@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base resets ─────────────────────────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-dm-serif), Georgia, serif;
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  body {
+    font-family: var(--font-plus-jakarta), system-ui, sans-serif;
+  }
+}
+
+/* ─── Component classes ───────────────────────── */
+@layer components {
+  /* Inputs */
+  .cv-input {
+    @apply w-full px-3 py-2 text-sm rounded-lg border border-gray-200
+           bg-white text-navy-900 placeholder-gray-400
+           focus:outline-none focus:ring-2 focus:ring-electric/40 focus:border-electric
+           transition-all duration-150;
+  }
+
+  .cv-textarea {
+    @apply cv-input resize-none;
+  }
+
+  .cv-label {
+    @apply block text-xs font-600 text-gray-500 uppercase tracking-wide mb-1;
+  }
+
+  /* Primary button */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl
+           bg-navy-900 text-white text-sm font-600
+           hover:bg-navy-800 active:scale-95
+           transition-all duration-150 shadow-sm;
+  }
+
+  /* Secondary button */
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl
+           bg-white text-navy-900 text-sm font-600 border border-gray-200
+           hover:bg-cream-100 active:scale-95
+           transition-all duration-150;
+  }
+
+  /* Accent button (CTA) */
+  .btn-accent {
+    @apply inline-flex items-center gap-2 px-8 py-4 rounded-2xl
+           bg-electric text-white text-base font-600
+           hover:bg-navy-600 active:scale-95
+           transition-all duration-200 shadow-md hover:shadow-lg;
+  }
+
+  /* Section card */
+  .form-card {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-card p-5 mb-4;
+  }
+
+  /* Section title */
+  .section-title {
+    @apply text-base font-700 text-navy-900 mb-4 flex items-center gap-2;
+  }
+}
+
+/* ─── Utilities ───────────────────────────────── */
+@layer utilities {
+  .font-600 { font-weight: 600; }
+  .font-700 { font-weight: 700; }
+
+  /* Animation delay helpers */
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+
+  /* Hide scrollbar but keep scroll */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* ─── A4 Preview ──────────────────────────────── */
+/* The CV preview is always rendered at A4 scale */
+.a4-page {
+  width: 794px;
+  min-height: 1123px;
+  background: white;
+  position: relative;
+}
+
+/* ─── Print styles ────────────────────────────── */
+@media print {
+  body * { visibility: hidden; }
+  #cv-preview, #cv-preview * { visibility: visible; }
+  #cv-preview {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 794px;
+  }
+}
