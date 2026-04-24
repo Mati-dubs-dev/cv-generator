@@ -1,4 +1,5 @@
 import './globals.css'
+import { Suspense } from 'react'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Analytics } from '@vercel/analytics/react'
 import AnalyticsTracker from './analytics-tracker'
@@ -14,13 +15,12 @@ export default function RootLayout({ children }) {
       <body className="font-body antialiased bg-white text-navy-900">
         {children}
 
-        {/* Tu tracker personalizado */}
-        <AnalyticsTracker />
+        {/* 👇 ENVOLVER ESTO */}
+        <Suspense fallback={null}>
+          <AnalyticsTracker />
+        </Suspense>
 
-        {/* Google Analytics */}
         <GoogleAnalytics gaId="G-TZ8VCXDHY3" />
-
-        {/* Vercel Analytics */}
         <Analytics />
       </body>
     </html>
