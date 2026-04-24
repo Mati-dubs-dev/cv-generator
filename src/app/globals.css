@@ -114,3 +114,25 @@
     width: 794px;
   }
 }
+
+/* ─── v2 additions ────────────────────────────────────────────────── */
+
+/* PDF page-break helpers (used by html2pdf pagebreak config) */
+.pdf-page-break-before { page-break-before: always; }
+.pdf-page-break-after  { page-break-after:  always; }
+.pdf-no-break          { page-break-inside: avoid; break-inside: avoid; }
+
+/* Drag-over highlight for PhotoUpload */
+.drag-active {
+  @apply border-electric bg-blue-50;
+}
+
+/* Form card active/focus ring variant */
+.form-card-focus {
+  @apply ring-2 ring-electric/30;
+}
+
+/* Smooth zoom transition on preview container */
+#cv-preview {
+  will-change: transform;
+}

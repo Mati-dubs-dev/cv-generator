@@ -1,13 +1,18 @@
 /**
  * useCVStore — Central state for the CV Generator
  * Uses Zustand with localStorage persistence
+ *
+ * CHANGES v2:
+ *   - Added `photo` field (base64 string) to cvData
+ *   - Added `setPhoto` / `removePhoto` actions
+ *   - Added `saveStatus` ('idle' | 'saving' | 'saved') for UI feedback
+ *   - Added `setSaveStatus` action consumed by useAutoSave hook
  */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// ─── Default empty CV data ────────────────────────────────────────────────
+// ─── Default empty CV data ────────────────────────────────────────────────────
 const defaultCV = {
-  // Personal info
   fullName: '',
   professionalTitle: '',
   email: '',
@@ -16,8 +21,8 @@ const defaultCV = {
   website: '',
   linkedin: '',
   summary: '',
+  photo: null,           // base64 string | null
 
-  // Work experience — array of entries
   experience: [
     {
       id: crypto.randomUUID(),
@@ -30,7 +35,6 @@ const defaultCV = {
     },
   ],
 
-  // Education — array of entries
   education: [
     {
       id: crypto.randomUUID(),
@@ -43,32 +47,53 @@ const defaultCV = {
     },
   ],
 
-  // Skills — array of strings
   skills: [],
-
-  // Languages — array of { language, level }
   languages: [],
 };
 
-// ─── Store ────────────────────────────────────────────────────────────────
+// ─── Store ────────────────────────────────────────────────────────────────────
 const useCVStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       // CV data
       cvData: defaultCV,
-      // Currently selected template: 'classic' | 'modern' | 'minimalist'
+
+      // Selected template
       selectedTemplate: 'modern',
-      // Has the user made any changes?
+
+      // Dirty flag — true when unsaved changes exist
       isDirty: false,
 
-      // ── Update top-level fields ──────────────────────────────────────────
+      // Autosave visual feedback
+      saveStatus: 'idle', // 'idle' | 'saving' | 'saved'
+
+      // ── Save status ────────────────────────────────────────────────────────
+      setSaveStatus: (status) => set({ saveStatus: status }),
+
+      // ── Update top-level fields ────────────────────────────────────────────
       updateField: (field, value) =>
         set((state) => ({
           cvData: { ...state.cvData, [field]: value },
           isDirty: true,
+          saveStatus: 'saving',
         })),
 
-      // ── Experience ───────────────────────────────────────────────────────
+      // ── Photo ──────────────────────────────────────────────────────────────
+      setPhoto: (base64) =>
+        set((state) => ({
+          cvData: { ...state.cvData, photo: base64 },
+          isDirty: true,
+          saveStatus: 'saving',
+        })),
+
+      removePhoto: () =>
+        set((state) => ({
+          cvData: { ...state.cvData, photo: null },
+          isDirty: true,
+          saveStatus: 'saving',
+        })),
+
+      // ── Experience ─────────────────────────────────────────────────────────
       addExperience: () =>
         set((state) => ({
           cvData: {
@@ -87,6 +112,7 @@ const useCVStore = create(
             ],
           },
           isDirty: true,
+          saveStatus: 'saving',
         })),
 
       updateExperience: (id, field, value) =>
@@ -98,6 +124,7 @@ const useCVStore = create(
             ),
           },
           isDirty: true,
+          saveStatus: 'saving',
         })),
 
       removeExperience: (id) =>
@@ -107,9 +134,10 @@ const useCVStore = create(
             experience: state.cvData.experience.filter((exp) => exp.id !== id),
           },
           isDirty: true,
+          saveStatus: 'saving',
         })),
 
-      // ── Education ────────────────────────────────────────────────────────
+      // ── Education ──────────────────────────────────────────────────────────
       addEducation: () =>
         set((state) => ({
           cvData: {
@@ -128,6 +156,7 @@ const useCVStore = create(
             ],
           },
           isDirty: true,
+          saveStatus: 'saving',
         })),
 
       updateEducation: (id, field, value) =>
@@ -139,6 +168,7 @@ const useCVStore = create(
             ),
           },
           isDirty: true,
+          saveStatus: 'saving',
         })),
 
       removeEducation: (id) =>
@@ -148,13 +178,15 @@ const useCVStore = create(
             education: state.cvData.education.filter((edu) => edu.id !== id),
           },
           isDirty: true,
+          saveStatus: 'saving',
         })),
 
-      // ── Skills ───────────────────────────────────────────────────────────
+      // ── Skills ─────────────────────────────────────────────────────────────
       setSkills: (skills) =>
         set((state) => ({
           cvData: { ...state.cvData, skills },
           isDirty: true,
+          saveStatus: 'saving',
         })),
 
       addSkill: (skill) =>
@@ -164,6 +196,7 @@ const useCVStore = create(
           return {
             cvData: { ...state.cvData, skills: [...state.cvData.skills, trimmed] },
             isDirty: true,
+            saveStatus: 'saving',
           };
         }),
 
@@ -174,16 +207,18 @@ const useCVStore = create(
             skills: state.cvData.skills.filter((s) => s !== skill),
           },
           isDirty: true,
+          saveStatus: 'saving',
         })),
 
-      // ── Template ─────────────────────────────────────────────────────────
+      // ── Template ───────────────────────────────────────────────────────────
       setTemplate: (template) => set({ selectedTemplate: template }),
 
-      // ── Reset ────────────────────────────────────────────────────────────
+      // ── Reset ──────────────────────────────────────────────────────────────
       resetCV: () =>
         set({
           cvData: {
             ...defaultCV,
+            photo: null,
             experience: [
               {
                 id: crypto.randomUUID(),
@@ -208,9 +243,10 @@ const useCVStore = create(
             ],
           },
           isDirty: false,
+          saveStatus: 'idle',
         }),
 
-      // ── Load demo data ────────────────────────────────────────────────────
+      // ── Load demo data ─────────────────────────────────────────────────────
       loadDemo: () =>
         set({
           cvData: {
@@ -221,6 +257,7 @@ const useCVStore = create(
             location: 'Buenos Aires, Argentina',
             website: 'mariagonzalez.design',
             linkedin: 'linkedin.com/in/mariagonzalez',
+            photo: null,
             summary:
               'Diseñadora UX/UI con más de 6 años de experiencia creando productos digitales centrados en el usuario. Especializada en Design Systems, investigación de usuarios y prototipado de alta fidelidad. Apasionada por la intersección entre estética y funcionalidad.',
             experience: [
@@ -253,7 +290,8 @@ const useCVStore = create(
                 field: 'Diseño Gráfico',
                 startDate: '2014-03',
                 endDate: '2019-12',
-                description: 'Promedio 8.7/10. Tesis: "Diseño centrado en el usuario en aplicaciones móviles".',
+                description:
+                  'Promedio 8.7/10. Tesis: "Diseño centrado en el usuario en aplicaciones móviles".',
               },
               {
                 id: crypto.randomUUID(),
@@ -265,18 +303,32 @@ const useCVStore = create(
                 description: '',
               },
             ],
-            skills: ['Figma', 'Adobe XD', 'Prototyping', 'User Research', 'Design Systems', 'Sketch', 'HTML/CSS', 'Agile/Scrum'],
+            skills: [
+              'Figma', 'Adobe XD', 'Prototyping', 'User Research',
+              'Design Systems', 'Sketch', 'HTML/CSS', 'Agile/Scrum',
+            ],
             languages: [
               { language: 'Español', level: 'Nativo' },
               { language: 'Inglés', level: 'Avanzado (C1)' },
             ],
           },
           isDirty: true,
+          saveStatus: 'saving',
         }),
     }),
     {
-      name: 'cv-generator-data', // localStorage key
-      version: 1,
+      name: 'cv-generator-data',
+      version: 2, // bumped from v1 — migrates existing localStorage
+      migrate: (persistedState, version) => {
+        // v1 → v2: add photo field if missing
+        if (version < 2) {
+          return {
+            ...persistedState,
+            cvData: { ...persistedState.cvData, photo: null },
+          };
+        }
+        return persistedState;
+      },
     }
   )
 );
