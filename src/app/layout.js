@@ -1,4 +1,5 @@
 import './globals.css';
+import Script from 'next/script';
 
 export const metadata = {
   title: 'CVRápido — Crear CV gratis online en minutos',
@@ -19,7 +20,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es">
       <head>
-        {/* Google Fonts loaded at runtime — no build-time fetch needed */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -28,8 +28,23 @@ export default function RootLayout({ children }) {
         />
         <link rel="canonical" href="https://cvrapido.app" />
       </head>
+
       <body className="font-body antialiased bg-white text-navy-900">
         {children}
+
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-TZ8VCXDHY3"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-TZ8VCXDHY3');
+          `}
+        </Script>
       </body>
     </html>
   );
