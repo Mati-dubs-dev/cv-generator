@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Hero from '@/components/landing/Hero';
@@ -6,7 +7,6 @@ import HowItWorks from '@/components/landing/HowItWorks';
 import TemplatesPreview from '@/components/landing/TemplatesPreview';
 import CTA from '@/components/landing/CTA';
 
-// Per-page SEO metadata (overrides root layout)
 export const metadata = {
   title: 'CVRápido — Crear CV gratis online en minutos',
   description:
@@ -18,7 +18,7 @@ export const metadata = {
 
 export default function HomePage() {
   return (
-    <>
+    <Suspense fallback={<div></div>}>
       <Header />
       <main>
         <Hero />
@@ -28,6 +28,6 @@ export default function HomePage() {
         <CTA />
       </main>
       <Footer />
-    </>
+    </Suspense>
   );
 }
